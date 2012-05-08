@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>JQuery. Auto size fit width</title>
+
+<style>
+/*----------------------------------------------------------------------------*/
+/* TODO: Move to style.css                                                    */
+/*----------------------------------------------------------------------------*/
+#wrapper        { text-align: center; }
+#wrapper button { margin: 0; padding: 2px 10px; }
+
+#wrap * { margin: 0; padding: 0; }   
+#wrap   { border: 1px dotted black;display: block;margin: 0 auto;width: 500px;text-align: left; }
+
+#btnGenerate { border-radius: 15px 0 0 15px; }
+#btnAutosize { border-radius: 0 15px 15px 0; }
+
+.menu li   { border: 1px solid blue;border-radius: 0 15px 0 15px;display: 
+             inline-block;list-style: none outside none;margin: 5px 0 !important;
+             padding: 5px !important;text-decoration: none;text-align: center; }
+.menu li a { text-decoration: none; }
+/*----------------------------------------------------------------------------*/
+</style>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
+
+<script type="text/javascript">
+/*----------------------------------------------------------------------------*/
+/* TODO: Move to javacript.js                                                 */
+/*----------------------------------------------------------------------------*/
+
+function randomFromInterval(from,to) {
+    return Math.floor(Math.random()*(to-from+1)+from);
+}
+
+function getRandomWord() {
+    var wordLen = randomFromInterval(0,15);
+    var result = "";
+    for (var i = 0; i < wordLen; i++) {
+        result += "a";
+    }
+    return result;
+}
+
+function generateRandomMenu() {
+    var itemsCount = randomFromInterval(10,15);
+    var menuObject = $(".menu");
+    menuObject.html("");
+    for (var i = 0; i < itemsCount; i++) {
+        menuObject.append(" <li>item_"+getRandomWord()+"</li>");
+    }
+}
+
+function autoSizeFitWidth() {
+    var menuContainer = $(".menu");
+    var menuItems = menuContainer.children("li");
+    var itemsInfo = new Array(); // format: [[countInRow1,deltaForRow1],[countInRow2,deltaForRow2]]
+
+    var countInRow = 0;
+    var deltaForRow = 0;
+
+    var deltaPosition = 0;
+    
+    // space size between 2 elements
+    if (menuItems.length > 1) {
+        deltaPosition = $(menuItems[1]).position().left - menuContainer.position().left - $(menuItems[0]).outerWidth();
+    }
+
+    // get delta for each row
+    menuItems.each(function(i,e){
+        // check next element
+        if ((deltaForRow + $(e).outerWidth()) > menuContainer.width()) {
+            var delta = (menuContainer.width() - deltaForRow) / countInRow;
+            itemsInfo.push([countInRow, delta]);
+            countInRow = 0;
+            deltaForRow = 0;
+        }
+
+        countInRow++;
+        deltaForRow += $(e).outerWidth() + deltaPosition;
+
+        // check last element
+        if (i == (menuItems.length-1)) {
+            var delta = (menuContainer.width() - deltaForRow) / countInRow;
+            itemsInfo.push([countInRow, delta]);
+        }
+    });
+    
+    var itemsOfcet = 0;
+    // set delta for each row
+    $(itemsInfo).each(function(i,e){
+        var deltaWidth = e[1];
+        var countInRow = e[0];
+        for (var i = 0; i < countInRow; i++) {
+            var currentElement = $(menuItems[i + itemsOfcet]);
+            var currentItemWidth = parseInt(currentElement.css("width"));
+            currentElement.css("width", currentItemWidth + deltaWidth + "px");
+        }
+        itemsOfcet += countInRow;
+    })
+}
+
+$(document).ready(function() {
+    $("#btnGenerate").click(function(){ generateRandomMenu() });
+    $("#btnAutosize").click(function(){ autoSizeFitWidth() });
+
+    generateRandomMenu();
+});
+/*----------------------------------------------------------------------------*/
+</script>
+
+    </head>
+    <body>
+        <div id="wrapper">
+            <h1>
+                Audo Width with JQuery example by Georgy    Bunin 
+            </h1>
+            <hr />
+            <button id="btnGenerate">1. Generate menu</button><button id="btnAutosize">2. Auto size</button>
+            <hr />
+            <div id="wrap">
+                <ul class="menu"></ul>
+            </div>
+            <hr />
+            <address>
+                <a href="mailto:bunin.co.il@gmail.com">Email Me</a>
+            </address>
+        </div>
+    </body>
+</html>
+
